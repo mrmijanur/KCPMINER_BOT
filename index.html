@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>KCP Miner</title>
+<style>
+:root{--bg:#f1edff;--card:#ffffff;--ink:#1a1033;--mute:#6b63a0;--line:#dcd4ff;--acc:#1a1033;--hi:#f59e0b;--vio:#8b5cf6;--ok:#0f9d6e;--on:#f1edff;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0a0720;--card:#16123a;--ink:#f4f0ff;--mute:#a79fd6;--line:#2c2762;--acc:#ffb020;--hi:#ffb020;--vio:#8b5cf6;--ok:#3df0b0;--on:#1a1033}}
+:root[data-theme="dark"]{--bg:#0a0720;--card:#16123a;--ink:#f4f0ff;--mute:#a79fd6;--line:#2c2762;--acc:#ffb020;--hi:#ffb020;--vio:#8b5cf6;--ok:#3df0b0;--on:#1a1033}
+*{box-sizing:border-box}html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--ink);font:16px/1.4 "Trebuchet MS",system-ui,sans-serif}
+#app{max-width:480px;margin:0 auto;min-height:100%;padding:16px 16px calc(96px + env(safe-area-inset-bottom,0px))}
+h1,h2{font-family:Georgia,serif;margin:0}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.logo{font:700 22px Georgia,serif;letter-spacing:.5px}.logo small{display:block;font:12px "Trebuchet MS",sans-serif;color:var(--mute);letter-spacing:0}
+.lvl{border:1.5px solid var(--ink);border-radius:20px;padding:4px 12px;font-weight:700}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:12px}
+.mute{color:var(--mute);font-size:13px}
+.big{font:700 38px Georgia,serif;margin:4px 0}
+.row{display:flex;gap:10px}.row>*{flex:1}
+.stat{text-align:center;padding:12px 6px}.stat b{display:block;font-size:20px}
+.bar{height:10px;background:var(--line);border-radius:6px;overflow:hidden;margin:10px 0 6px}.bar i{display:block;height:100%;background:var(--hi);width:0;transition:width .4s}
+button{font:inherit;font-weight:700;border:0;border-radius:14px;padding:14px;cursor:pointer;background:var(--acc);color:var(--on);width:100%}
+button.alt{background:transparent;color:var(--ink);border:1.5px solid var(--line)}
+button:disabled{opacity:.45;cursor:not-allowed}button:focus-visible,input:focus-visible,nav a:focus-visible{outline:3px solid var(--hi);outline-offset:2px}
+input{width:100%;font:inherit;font-size:20px;padding:12px;border-radius:12px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink)}
+.chips{display:flex;gap:8px;margin:10px 0}.chips button{padding:8px;font-size:14px}
+.live{color:var(--ok);font-weight:700}.live:before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--ok);margin-right:6px}
+.line{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed var(--line)}.line:last-child{border:0}
+.fr{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.tag{font-size:12px;padding:2px 9px;border-radius:10px;border:1px solid var(--line)}.tag.on{color:var(--ok);border-color:var(--ok)}
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);display:flex;justify-content:center;padding-bottom:env(safe-area-inset-bottom,0px)}
+nav div{display:flex;width:100%;max-width:480px}
+nav a{flex:1;text-align:center;padding:12px 4px;font-size:13px;color:var(--mute);text-decoration:none;font-weight:700}
+nav a[aria-current=page]{color:var(--ink);box-shadow:inset 0 3px 0 var(--hi)}
+nav a b{display:block;font-size:20px}
+.toast{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:20px;font-weight:700;z-index:9;opacity:0;pointer-events:none;transition:opacity .3s}.toast.show{opacity:1}
+.tasks .fr button{width:auto;padding:8px 14px}
+.tag.Pending{color:var(--hi);border-color:var(--hi)}.tag.Rejected{color:#e5484d;border-color:#e5484d}
+body{background:radial-gradient(circle at 15% -5%,color-mix(in srgb,var(--vio) 38%,transparent),transparent 55%),radial-gradient(circle at 100% 60%,color-mix(in srgb,var(--hi) 14%,transparent),transparent 50%),var(--bg);background-attachment:fixed}
+.card{backdrop-filter:blur(8px);box-shadow:0 8px 30px rgba(110,70,220,.14)}
+.logo{background:linear-gradient(90deg,var(--hi),var(--vio));-webkit-background-clip:text;background-clip:text;color:transparent}
+.lvl{border-color:var(--vio);background:linear-gradient(135deg,color-mix(in srgb,var(--vio) 25%,transparent),transparent)}
+button:not(.alt):not(.core){background:linear-gradient(135deg,#ffb020,#ff7a45);color:#1a1033}
+nav a[aria-current=page]{color:var(--hi)}
+.orb{position:relative;width:220px;height:220px;margin:8px auto 12px;display:grid;place-items:center}
+.orb svg{position:absolute;inset:0;transform:rotate(-90deg)}
+.spin{animation:spin 10s linear infinite;transform-origin:110px 110px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.core{width:170px;height:170px;border-radius:50%;padding:0;background:radial-gradient(circle at 35% 30%,#ffe08a,#f59e0b 45%,#7c3aed);color:#1a1033;box-shadow:0 0 40px rgba(245,158,11,.5);animation:pulse 2.4s ease-in-out infinite}
+.core small{font-size:11px;letter-spacing:1.5px}
+@keyframes pulse{50%{transform:scale(1.045);box-shadow:0 0 64px rgba(139,92,246,.75)}}
+.rank{display:inline-block;padding:4px 14px;border-radius:20px;font-weight:700;font-size:13px;background:linear-gradient(90deg,var(--vio),var(--hi));color:#1a1033}
+.float{position:fixed;pointer-events:none;font:700 20px Georgia,serif;color:var(--hi);z-index:9;animation:fl 1s ease-out forwards}
+@keyframes fl{to{transform:translateY(-90px);opacity:0}}
+@media (prefers-reduced-motion:reduce){.spin,.core,.float{animation:none}}
+.core{display:grid;place-items:center;text-align:center}
+.slide{position:relative;height:56px;border-radius:28px;background:var(--line);margin:6px 0 12px;touch-action:none;user-select:none;display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--mute);letter-spacing:.5px}
+.slide i{position:absolute;left:4px;top:4px;width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#ffb020,#ff7a45);display:grid;place-items:center;font-style:normal;font-size:22px;cursor:grab;color:#1a1033}
+.slide span{animation:nudge 1.8s ease-in-out infinite}
+@keyframes nudge{50%{transform:translateX(10px);opacity:.6}}
+</style></head><body>
+<div id="app"></div>
+<div class="toast" id="toast"></div>
+<nav><div id="nav"></div></nav>
+<script>
+try{window.Telegram&&Telegram.WebApp&&(Telegram.WebApp.ready(),Telegram.WebApp.expand())}catch(e){}
+// ---- Config (edit these) ----
+const LEVELS=[0,10,50,116,500,2000,5000,10000,25000]; // wallet hold needed per level
+const BASE=8, RATE=0.0038, VERIFY_FEE=0.05, MERCHANT="UQCdOfpGQHU6QriP09V-m2ACftXhQYwEy-lkzP5OO0nMy_4B", REF="KCP-"+Math.floor(1e5+Math.random()*9e5);
+const S={tab:"mine",bal:120,hold:0,pending:0,streak:1,withdrawn:0,ton:2.5,w:null,ver:0,friends:[
+ {n:"Rafi",h:240,a:1,v:1,e:420},{n:"Nusrat",h:0,a:0,v:0,e:0},{n:"Sakib",h:130,a:1,v:0,e:180},{n:"Tania",h:0,a:0,v:0,e:0}],tasks:[
+ {t:"Join KCP channel",r:25,d:0,u:"https://t.me/KCPMINER"},{t:"Daily check-in",r:10,d:0,k:"daily"},{t:"Invite 1 friend",r:50,d:0,k:"friend"}],hist:[]};
+try{const v=JSON.parse(localStorage.getItem("kcp_v1")||"null");if(v){S.bal=v.bal;S.last=v.last}}catch(e){}S.last=S.last||Date.now();
+const save=()=>{try{localStorage.setItem("kcp_v1",JSON.stringify({bal:S.bal,last:S.last}))}catch(e){}};
+const lvl=()=>{let l=1;LEVELS.forEach((v,i)=>{if(S.hold+S.bal>=v)l=i+1});return Math.min(l,LEVELS.length)};
+const RANKS=["Rookie","Digger","Prospector","Miner","Forger","Titan","Legend","Mythic","Cosmic"],rank=()=>"🏅 "+RANKS[lvl()-1];
+const mult=()=>+(1+(lvl()-1)*0.55).toFixed(2), hourly=()=>BASE*mult();
+const f=(n,d=2)=>(+n).toLocaleString("en",{minimumFractionDigits:d,maximumFractionDigits:d});
+function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1800)}
+setInterval(()=>{const e=document.getElementById("pend");if(e)e.textContent="+"+pend().toFixed(4)},1000);
+const V={
+mine(){const l=lvl(),nx=LEVELS[l]||null,p=nx?Math.min(100,(S.hold+S.bal)/nx*100):100;
+return `<div class=card><div class=mute>App balance (in-app)</div><div class=big>${f(S.bal,4)} <small style="font-size:16px">KCP</small></div></div>
+<div class=card style="text-align:center"><span class=live>Mining live</span>
+<div class=orb><svg viewBox="0 0 220 220" width=220 height=220><circle cx=110 cy=110 r=102 fill=none stroke="var(--line)" stroke-width=6 /><circle cx=110 cy=110 r=102 fill=none stroke="var(--hi)" stroke-width=6 stroke-linecap=round stroke-dasharray="${p*6.41} 641"/><circle class=spin cx=110 cy=110 r=92 fill=none stroke="var(--vio)" stroke-width=2 stroke-dasharray="4 10"/></svg>
+<div class=core><span><small>MINED</small><br><b id=pend style="font:700 22px Georgia,serif">+${pend().toFixed(4)}</b></span></div></div>
+<div class=slide id=sl><i id=kn tabindex=0 role=button aria-label="Extract mined KCP">⛏</i><span>Slide to extract ➜</span></div>
+<span class=rank>${rank()}</span><div class=mute style="margin-top:8px">Mining keeps running while you're offline. Storage holds up to 24 hours, slide to extract before it fills.</div></div>
+<div class=row><div class="card stat"><span class=mute>Hourly</span><b>${f(hourly(),1)}</b></div><div class="card stat"><span class=mute>Daily</span><b>~${f(hourly()*24,0)}</b></div><div class="card stat"><span class=mute>Boost</span><b>×${mult()}</b></div></div>
+<div class=card><b>Level ${l}</b> <span class=mute>· total ${f(S.hold+S.bal,0)} KCP</span><div class=bar><i style="width:${p}%"></i></div><span class=mute>${nx?`${f(nx-S.hold-S.bal,0)} KCP more to reach level ${l+1}`:"Max level"}</span></div>
+<div class=card><b>How levels work</b><p class=mute style="margin:6px 0 0">Your level and mining speed depend on your total KCP (app balance + wallet). Claim your mined KCP and hold more to level up.</p></div>`},
+shop(){const a=+(window._amt||1),g=Math.floor(a/RATE);
+return `<h2>Shop</h2><p class=mute>Buy KCP with TON at the market rate</p>
+<div class=card><div class=line><span class=mute>Rate</span><b>${RATE} TON / KCP</b></div>
+<div class=line><span class=mute>Your TON</span><b>${f(S.ton)}</b></div></div>
+<div class=card><label class=mute for=a>Amount in TON (min 0.1)</label><input id=a type=number step=0.1 min=0.1 value=${a} oninput="_amt=this.value;upd()">
+<div class=chips>${[0.1,0.5,1,5,10].map(x=>`<button class=alt onclick="_amt=${x};render()">${x}</button>`).join("")}</div>
+<div class=line><span>You receive</span><b id=g style="color:var(--ok)">+${f(g,0)} KCP</b></div>
+<div class=line><span class=mute>Service fee (5%)</span><span>${f(a*.05,3)} TON</span></div>
+<div class=line><b>Total</b><b id=tot>${f(a*1.05,3)} TON</b></div></div>
+${S.pay?`<div class=card><b>Waiting for payment…</b><p class=mute>Approve ${S.pay.tot} TON in Tonkeeper, then come back here. Your wallet is verified automatically after the payment.</p><button class=alt onclick="payDone()">I've paid</button></div>`:""}<button onclick="buy()">Buy with Tonkeeper</button>`},
+friends(){const act=S.friends.filter(x=>x.a).length;
+return `<h2>Friends</h2><p class=mute>Earn 5% of your active friends' claims</p>
+<div class=card><p class=mute style="margin-top:0">A friend becomes active at level 2 (116+ KCP on wallet).</p>
+<div class=mute>Your referral code</div><div class=big style="font-size:26px">${REF}</div>
+<div class=row><button class=alt onclick="navigator.clipboard&&navigator.clipboard.writeText('${REF}');toast('Copied')">Copy</button><button onclick="toast('Share sheet opens in Telegram')">Share</button></div></div>
+<div class=row><div class="card stat"><span class=mute>Invited</span><b>${S.friends.length}</b><span class=live style="font-size:12px">${act} active</span></div><div class="card stat"><span class=mute>Income</span><b>${f(S.friends.reduce((s,x)=>s+x.h*.05,0))}</b><span class=mute>KCP</span></div></div>
+<div class=card>${S.friends.map(x=>`<div class=fr><div><b>${x.n}</b><div class=mute>Hold ${f(x.h)} KCP · ${x.v?"Verified ✓":"Not verified"}</div></div><span class="tag ${x.a?"on":""}">${x.a?"Active":"Needs level 2"}</span></div>`).join("")}</div>`},
+tasks(){daily();return `<h2>Tasks</h2><p class=mute>Daily streak: ${S.streak} day${S.streak>1?"s":""}</p><div class="card tasks">${S.tasks.map((x,i)=>`<div class=fr><div><b>${x.t}</b><div class=mute>+${x.r} KCP${x.k=="daily"&&x.d?" · next check-in in "+reset():""}${x.k=="friend"?" · "+Math.min(1,vf())+"/1 friend verified (wallet verified after 0.05 TON payment)":""}</div></div><button ${x.d||(x.k=="friend"&&!vf())?"disabled":""} onclick="task(${i})">${x.d?"Done":(x.k=="friend"&&!vf()?"Locked":(x.u&&!x.o?"Join":"Claim"))}</button></div>`).join("")}</div>`},
+wallet(){const max=Math.floor(S.hold*2),can=S.w&&S.ver;
+return `<h2>Wallet</h2><p class=mute>Connect a TON wallet, verify it, then withdraw mined KCP</p>
+<div class=row><div class="card stat"><span class=mute>Wallet hold</span><b>${f(S.hold,1)}</b></div><div class="card stat"><span class=mute>Withdrawn</span><b>${f(S.withdrawn,0)}</b></div></div>
+<div class=card><div class=line><b>Wallet</b><span class="tag ${S.w?"on":""}">${S.w?"Linked":"Not linked"}</span></div>
+<p class=mute style="word-break:break-all">${S.w||"Connect opens Tonkeeper to pay a one-time 0.05 TON. Your wallet is linked and verified automatically."}</p>
+<button class=${S.w?"alt":""} onclick="${S.w?"S.w=null;S.ver=0;render()":"verify()"}">${S.w?"Disconnect":"Connect wallet"}</button></div>
+<div class=card><div class=line><b>Verification</b><span class="tag ${S.ver?"on":""}">${S.ver?"Verified":"Not verified"}</span></div>
+<p class=mute>${S.ver?"Your wallet is verified. Withdrawals are unlocked.":`Confirm you own this wallet with a one-time ${VERIFY_FEE} TON verification payment. Required before your first withdrawal.`}</p>
+<div class=line><span class=mute>Verification fee</span><span>${VERIFY_FEE} TON</span></div>
+<div class=line><span class=mute>Your TON</span><span>${f(S.ton,3)}</span></div>
+${S.pay&&!S.ver?`<p class=mute>Waiting for payment… approve ${S.pay.tot} TON in Tonkeeper, then return here.</p><button class=alt onclick="payDone()">I've paid</button>`:`<button onclick="verify()" ${S.ver?"disabled":""}>${S.ver?"Wallet verified":"Verify wallet · "+VERIFY_FEE+" TON"}</button>`}</div>
+<div class=card><b>Withdrawal rules</b><div class=line><span class=mute>Verified wallet</span><span>Required</span></div><div class=line><span class=mute>Minimum</span><span>5,000 KCP</span></div><div class=line><span class=mute>Fee</span><span>9% (450 KCP per 5,000)</span></div><div class=line><span class=mute>Frequency</span><span>1 per 24 hours</span></div><div class=line><span class=mute>Hold requirement</span><span>50% of amount on wallet</span></div></div>
+<div class=card><label class=mute for=w>Amount to withdraw</label><input id=w type=number value=5000 min=5000 step=100>
+<label class=mute for=wa>Your TON wallet address</label><input id=wa placeholder="UQ..." autocomplete=off style="font-size:14px;margin-bottom:8px">
+<p class=mute>9% fee is deducted (5,000 KCP → you receive 4,550 KCP). Every request is reviewed and approved manually.</p>
+<p class=mute>You can withdraw up to ${f(max,0)} KCP with your current hold.</p>
+<button onclick="wd()" ${can?"":"disabled"}>${S.w?(S.ver?"Withdraw to wallet":"Verify wallet to withdraw"):"Withdraw to wallet"}</button></div>
+<div class=card><b>History</b>${S.hist.length?`<p class=mute style="margin:2px 0 6px">${S.hist.filter(h=>h.st=="Pending").length} pending · ${S.hist.filter(h=>h.st=="Approved").length} approved · ${S.hist.filter(h=>h.st=="Rejected").length} rejected</p>`:""}${S.hist.length?S.hist.map(h=>`<div class=fr><div><b>${f(h.a,0)} KCP</b><div class=mute>Fee ${f(h.a*.09,0)} · Net ${f(h.net,0)} KCP</div><div class=mute>${sh(h.ad)} · ${new Date(h.t).toLocaleString("en",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}</div></div><span class="tag ${h.st=="Approved"?"on":h.st}">${h.st}</span></div>`).join(""):'<p class=mute style="margin:6px 0 0">No withdrawals yet.</p>'}</div>`}};
+function upd(){const a=+(window._amt||0),g=document.getElementById("g");if(g){g.textContent="+"+f(Math.floor(a/RATE),0)+" KCP";document.getElementById("tot").textContent=f(a*1.05,3)+" TON"}}
+function claim(e){const P=pend();if(P<.01)return toast("Nothing to claim yet");if(e&&e.clientX!=null){const x=document.createElement("div");x.className="float";x.textContent="+"+P.toFixed(2);x.style.left=e.clientX+"px";x.style.top=e.clientY+"px";document.body.appendChild(x);setTimeout(()=>x.remove(),1000)}const L0=lvl();S.bal+=P;S.last=Date.now();toast(lvl()>L0?"Level up! Lvl "+lvl():"+"+P.toFixed(4)+" KCP claimed");render()}
+function buy(){const a=+(window._amt||1);if(a<.1)return toast("Minimum is 0.1 TON");const tot=+(a*1.05).toFixed(4),g=Math.floor(a/RATE);S.pay={tot,g};if(MERCHANT.startsWith("PASTE")){toast("Demo mode: set MERCHANT address");return setTimeout(payDone,1200)}const u="https://app.tonkeeper.com/transfer/"+MERCHANT+"?amount="+Math.round(tot*1e9)+"&text="+encodeURIComponent("KCP "+REF);try{window.Telegram&&Telegram.WebApp&&Telegram.WebApp.openLink?Telegram.WebApp.openLink(u):window.open(u,"_blank")}catch(e){window.open(u,"_blank")}render()}
+function payDone(){const p=S.pay;if(!p)return;S.ton=Math.max(0,+(S.ton-p.tot).toFixed(4));S.hold+=p.g;S.ver=1;S.w=S.w||"Tonkeeper wallet";S.pay=null;toast((p.g?"Bought "+p.g+" KCP · ":"")+"Wallet verified ✓");render()}
+addEventListener("visibilitychange",()=>{if(!document.hidden&&S.pay){toast("Checking payment…");setTimeout(payDone,2000)}});
+const vf=()=>S.friends.filter(x=>x.v).length,sh=a=>a?a.slice(0,6)+"…"+a.slice(-6):"";
+const today=()=>new Date().toISOString().slice(0,10);
+function daily(){S.tasks.forEach(x=>{if(x.k=="daily")x.d=S.daily==today()?1:0})}
+function reset(){const n=new Date(),m=Date.UTC(n.getUTCFullYear(),n.getUTCMonth(),n.getUTCDate()+1)-n,h=Math.floor(m/36e5);return h+"h "+Math.floor(m%36e5/6e4)+"m"}
+function pend(){return hourly()*Math.min(Date.now()-S.last,864e5)/36e5}
+function bind(){const s=document.getElementById("sl"),k=document.getElementById("kn");if(!s)return;let d=0,x0=0;const mx=()=>s.clientWidth-56;k.onpointerdown=e=>{d=1;x0=e.clientX;k.setPointerCapture(e.pointerId)};k.onpointermove=e=>{if(d)k.style.left=Math.max(4,Math.min(mx(),4+e.clientX-x0))+"px"};k.onpointerup=e=>{if(!d)return;d=0;const ok=parseFloat(k.style.left||4)>=mx()-6;k.style.left="4px";if(ok)claim({clientX:e.clientX,clientY:e.clientY})};k.onkeydown=e=>{if(e.key=="Enter"||e.key==" "){e.preventDefault();claim()}}}
+function task(i){const x=S.tasks[i];if(x.k=="friend"&&!vf())return toast("Your friend must verify their wallet first");if(x.u&&!x.o){x.o=1;try{window.Telegram&&Telegram.WebApp&&Telegram.WebApp.openTelegramLink?Telegram.WebApp.openTelegramLink(x.u):window.open(x.u,"_blank")}catch(e){window.open(x.u,"_blank")}return render()}S.tasks[i].d=1;if(x.k=="daily"){const y=new Date(Date.now()-864e5).toISOString().slice(0,10);S.streak=S.daily==y?S.streak+1:1;S.daily=today()}S.bal+=S.tasks[i].r;toast("+"+S.tasks[i].r+" KCP");render()}
+function verify(){if(S.ver)return;S.pay={tot:VERIFY_FEE,g:0};const u="https://app.tonkeeper.com/transfer/"+MERCHANT+"?amount="+Math.round(VERIFY_FEE*1e9)+"&text="+encodeURIComponent("KCP-VERIFY "+REF);try{window.Telegram&&Telegram.WebApp&&Telegram.WebApp.openLink?Telegram.WebApp.openLink(u):window.open(u,"_blank")}catch(e){window.open(u,"_blank")}render()}
+function wd(){if(!S.w)return toast("Connect a wallet first");if(!S.ver)return toast("Verify your wallet first");const a=+document.getElementById("w").value;if(a<5000)return toast("Minimum is 5,000 KCP");if(a>S.bal)return toast("Not enough app balance");if(S.hold<a*.5)return toast("Hold at least 50% of the amount on wallet");const ad=document.getElementById("wa").value.trim();if(!/^(UQ|EQ)[\w-]{46}$/.test(ad))return toast("Enter a valid TON address");if(S.lastWd&&Date.now()-S.lastWd<864e5)return toast("1 withdrawal per 24 hours");S.bal-=a;S.lastWd=Date.now();S.hist.unshift({a,net:a*.91,st:"Pending",ad,t:Date.now()});toast("Request sent for approval");render()}
+const BOT="KCPMINER_BOT";
+const myId=()=>{try{return Telegram.WebApp.initDataUnsafe.user.id}catch(e){return REF.slice(4)}};
+const refLink=()=>"https://t.me/"+BOT+"?startapp=ref_"+myId();
+function share(){const t="https://t.me/share/url?url="+encodeURIComponent(refLink())+"&text="+encodeURIComponent("Mine KCP with me!");try{Telegram.WebApp.openTelegramLink(t)}catch(e){window.open(t,"_blank")}}
+function copyRef(){try{navigator.clipboard.writeText(refLink())}catch(e){}toast("Link copied")}
+V.friends=function(){const fr=[...S.friends].sort((a,b)=>b.e-a.e),com=S.friends.reduce((s,x)=>s+x.e*.05,0),med=["🥇","🥈","🥉"];
+return `<h2>Friends</h2><p class=mute>Earn 5% commission from your friends' mining</p>
+<div class=card><div class=mute>Your invite link</div><div style="font-weight:700;word-break:break-all;margin:6px 0 10px">${refLink()}</div>
+<div class=row><button class=alt onclick="copyRef()">Copy link</button><button onclick="share()">Share</button></div></div>
+<div class=row><div class="card stat"><span class=mute>Invited</span><b>${S.friends.length}</b></div><div class="card stat"><span class=mute>Verified</span><b>${vf()}</b><span class=mute style="font-size:11px">0.05 TON</span></div><div class="card stat"><span class=mute>Commission</span><b>${f(com)}</b><span class=mute>KCP</span></div></div>
+<div class=card><b>Ranking</b><p class=mute style="margin:2px 0 6px">Friends ranked by how much they earned for you</p>${fr.map((x,i)=>`<div class=fr><div><b>${med[i]||"#"+(i+1)} ${x.n}</b><div class=mute>Earned ${f(x.e,0)} KCP · you got +${f(x.e*.05)} KCP</div></div><span class="tag ${x.v?"on":""}">${x.v?"Verified ✓":"Not verified"}</span></div>`).join("")}</div>`};
+const T=[["mine","⛏","Mining"],["shop","🛍","Shop"],["friends","👥","Friends"],["tasks","✅","Tasks"],["wallet","👛","Wallet"]];
+function render(){document.getElementById("app").innerHTML=`<header><div class=logo>KCP Miner<small>Mine, hold, level up</small></div><div class=lvl>Lvl ${lvl()}</div></header>`+V[S.tab]();
+document.getElementById("nav").innerHTML=T.map(t=>`<a href="#${t[0]}" ${S.tab==t[0]?'aria-current="page"':""}><b>${t[1]}</b>${t[2]}</a>`).join("");bind();save()}
+function route(){const h=location.hash.slice(1);if(V[h]){S.tab=h;render()}}
+addEventListener("hashchange",route);route();render();
+</script></body></html>
